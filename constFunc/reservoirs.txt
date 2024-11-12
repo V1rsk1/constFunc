@@ -1,0 +1,3 @@
+Ocean1 56 27 26Sea
+Lake 89 90 87Lake
+Ocean2 78 63 90Sea
