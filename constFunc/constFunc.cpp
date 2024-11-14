@@ -1,129 +1,104 @@
-﻿#include <iostream>
+#include <iostream>
 #include <vector>
 #include <string>
 #include <fstream>
+#include<Windows.h>
+
+
+
 using namespace std;
+
 class Reservoir {
-    string Nazva;
+    string name;
     double width;
     double length;
     double maxDepth;
     string type;
+
 public:
-    Reservoir() : Nazva("empty"), width(0), length(0), maxDepth(0), type("empty") {}
+    Reservoir() : name("empty"), width(0), length(0), maxDepth(0), type("empty") {}
+    
+    Reservoir(const string& name, double width, double length, double maxDepth, const string& type) 
+        : name(name), width(width), length(length), maxDepth(maxDepth), type(type) {}
+
     void display() const {
-        cout << "Name: " << Nazva << "\nWidth: " << width << "\nLength: " << length << "\nMax Depth: " << maxDepth << "\nType: " << type << endl;
+        cout << "Назва: " << name << "\nШирина: " << width << "\nДовжина: " << length 
+             << "\nМаксимальна глибина: " << maxDepth << "\nТип: " << type << endl;
     }
-    explicit Reservoir(const string& name, double width, double length, double maxDepth, const string& tyype) : Nazva(name), width(width), length(length), maxDepth(maxDepth), type(tyype) {}
 
-    Reservoir(const Reservoir& other) : Nazva(other.Nazva), width(other.width), length(other.length), maxDepth(other.maxDepth), type(other.type) {}
-
-    ~Reservoir() {}
-
-    double PriblObsyag() const {
+    double approximateVolume() const {
         return width * length * maxDepth;
     }
 
-    double S() const {
+    double surfaceArea() const {
         return width * length;
     }
-    bool SameType(const Reservoir& other) const {
-        if (type == other.type) {
-            return (type == other.type);
-        }
-        return false;
-    }
-    bool Porivnyannya_S(const Reservoir& other) const {
-        if (SameType(other)) {
-            return S() > other.S();
-        }
-        return false;
-    }
-    void setName(const string& name) {
-        this->Nazva = name;
+
+    bool isSameType(const Reservoir& other) const {
+        return type == other.type;
     }
 
-    string getName() const {
-        return Nazva;
+    bool compareSurfaceArea(const Reservoir& other) const {
+        return isSameType(other) && (surfaceArea() > other.surfaceArea());
     }
 
-    void setWidth(double widthh) {
-        this->width = widthh;
-    }
+    // Getters and Setters
+    string getName() const { return name; }
+    void setName(const string& name) { this->name = name; }
 
-    double getWidth() const {
-        return width;
-    }
+    double getWidth() const { return width; }
+    void setWidth(double width) { this->width = width; }
 
-    void setLength(double lengthh) {
-        this->length = lengthh;
-    }
+    double getLength() const { return length; }
+    void setLength(double length) { this->length = length; }
 
-    double getLength() const {
-        return length;
-    }
+    double getMaxDepth() const { return maxDepth; }
+    void setMaxDepth(double maxDepth) { this->maxDepth = maxDepth; }
 
-    void setType(const string& typee) {
-        this->type = typee;
-    }
-
-    string getType() const {
-        return type;
-    }
-
-    void setMaxDepth(double maxDepthh) {
-        this->maxDepth = maxDepthh;
-    }
-
-    double getMaxDepth() const {
-        return maxDepth;
-    }
-    Reservoir& operator=(const Reservoir& other) {
-        if (this != &other) {
-            Nazva = other.Nazva;
-            width = other.width;
-            length = other.length;
-            maxDepth = other.maxDepth;
-            type = other.type;
-        }
-        return *this;
-    }
+    string getType() const { return type; }
+    void setType(const string& type) { this->type = type; }
 };
-class ReservoirInterface {
-    vector<Reservoir> vodoymy;
+
+class ReservoirManager {
+    vector<Reservoir> reservoirs;
+
 public:
-    void addReservoir(const Reservoir& vodoymyy) {
-        vodoymy.push_back(vodoymyy);
+    void addReservoir(const Reservoir& res) {
+        reservoirs.push_back(res);
     }
+
     void removeReservoir(size_t index) {
-        if (index < vodoymy.size()) {
-            vodoymy.erase(vodoymy.begin() + index);
+        if (index < reservoirs.size()) {
+            reservoirs.erase(reservoirs.begin() + index);
         }
     }
-    void saveFile(const string& filename) const {
+
+    void saveToFile(const string& filename) const {
         ofstream file(filename);
-        for (const auto& reservoir : vodoymy) {
-            file << reservoir.getName() << " " << reservoir.getWidth() << " " << reservoir.getLength() << " " << reservoir.getMaxDepth() << reservoir.getType() << endl;
+        for (const auto& res : reservoirs) {
+            file << res.getName() << " " << res.getWidth() << " " << res.getLength() 
+                 << " " << res.getMaxDepth() << " " << res.getType() << endl;
         }
     }
+
     void displayAll() const {
-        for (const auto& reservoir : vodoymy) {
-            reservoir.display();
-            reservoir.getMaxDepth();
-            cout << "Priblizna plosha: " << reservoir.PriblObsyag() << endl;
-            cout << "Same types: " << reservoir.SameType(reservoir) << endl;
-            cout << "Plosha water poferhni: " << reservoir.S() << endl;
+        for (const auto& res : reservoirs) {
+            res.display();
+            cout << "Приблизний об'єм: " << res.approximateVolume() << endl;
+            cout << "Площа поверхні води: " << res.surfaceArea() << endl;
             cout << endl;
         }
-        for (int i = 0; i < vodoymy.size(); ++i) {
-            for (int j = i + 1; j < vodoymy.size(); ++j) {
-                if (vodoymy[i].SameType(vodoymy[j])) {
-                    cout << "Comparing " << vodoymy[i].getName() << " with " << vodoymy[j].getName() << ": " << endl;
-                    if (vodoymy[i].Porivnyannya_S(vodoymy[j])) {
-                        cout << vodoymy[i].getName() << " has a larger water surface." << endl;
-                    }
-                    else {
-                        cout << vodoymy[j].getName() << " has a larger water surface." << endl;
+
+        // Порівняння площ поверхні води для однакових типів
+        for (size_t i = 0; i < reservoirs.size(); ++i) {
+            for (size_t j = i + 1; j < reservoirs.size(); ++j) {
+                if (reservoirs[i].isSameType(reservoirs[j])) {
+                    cout << "Порівняння " << reservoirs[i].getName() 
+                         << " і " << reservoirs[j].getName() << ": " << endl;
+                    if (reservoirs[i].compareSurfaceArea(reservoirs[j])) {
+                        cout << reservoirs[i].getName() << " має більшу площу поверхні." << endl;
+                    } else {
+                        cout << reservoirs[j].getName() << " має більшу площу поверхні." << endl;
                     }
                     cout << endl;
                 }
@@ -131,11 +106,15 @@ public:
         }
     }
 };
-int main()
-{
-    ReservoirInterface manager;
+
+int main() {
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+
+    
+    ReservoirManager manager;
     Reservoir res1("Ocean1", 56, 27, 26, "Sea");
-    Reservoir res2("Lake", 89, 90, 87, "Lake");
+    Reservoir res2("Lake1", 89, 90, 87, "Lake");
     Reservoir res3("Ocean2", 78, 63, 90, "Sea");
 
     manager.addReservoir(res1);
@@ -143,6 +122,7 @@ int main()
     manager.addReservoir(res3);
 
     manager.displayAll();
+    manager.saveToFile("reservoirs.txt");
 
-    manager.saveFile("reservoirs.txt");
+    return 0;
 }
